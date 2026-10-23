@@ -1,0 +1,114 @@
+/* PC Stream для Tizen 5.5 (Chromium 69).
+   Правила как в KinoPub: без backdrop-filter, без теней и анимаций во время просмотра,
+   стекло — статичные полупрозрачные градиенты. */
+
+:root {
+    --text: #eef1f8;
+    --muted: rgba(238, 241, 248, .6);
+    --line: rgba(255, 255, 255, .14);
+    --accent: #7aa2ff;
+    --accent2: #b98cff;
+    --ok: #3ddc84;
+    --focus-bg: #fff;
+    --focus-text: #0d0f16;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; color: var(--text); }
+/* фон только у body — на время видео делаем прозрачным не нужно (MSE рисует в слое страницы) */
+body { background: #07080d; font-family: "SamsungOneUI", "SamsungOne", "Tizen Sans", "Roboto", "Segoe UI", sans-serif; font-size: 28px; }
+#app { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; overflow: hidden; transform-origin: 0 0; }
+svg { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+svg .fill { fill: currentColor; stroke: none; }
+
+.screen { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; }
+.hidden { display: none !important; }
+
+.glass {
+    background: linear-gradient(135deg, rgba(255, 255, 255, .11), rgba(255, 255, 255, .035));
+    border: 1.5px solid var(--line);
+    border-radius: 32px;
+}
+
+/* ---------- Главный экран ---------- */
+.bg {
+    position: absolute; left: 0; top: 0; right: 0; bottom: 0;
+    background:
+        radial-gradient(circle at 18% 20%, rgba(122, 162, 255, .35), rgba(122, 162, 255, 0) 45%),
+        radial-gradient(circle at 85% 85%, rgba(185, 140, 255, .3), rgba(185, 140, 255, 0) 45%),
+        #07080d;
+}
+.home-inner { position: absolute; left: 160px; right: 160px; top: 90px; bottom: 80px; }
+.brand { display: flex; align-items: center; margin-bottom: 48px; }
+.logo {
+    width: 96px; height: 96px; border-radius: 26px; margin-right: 30px;
+    display: flex; align-items: center; justify-content: center; font-size: 54px; color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+}
+.brand-name { font-size: 64px; font-weight: 800; letter-spacing: -1px; }
+.brand-sub { font-size: 28px; color: var(--muted); }
+
+.panel { padding: 40px 44px; }
+.panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.panel-title { font-size: 34px; font-weight: 700; }
+.scan-state { font-size: 24px; color: var(--muted); }
+.pc-list { min-height: 300px; }
+.pc {
+    display: flex; align-items: center; padding: 24px 30px; margin-bottom: 16px; border-radius: 24px;
+    background: rgba(255, 255, 255, .07); border: 1.5px solid rgba(255, 255, 255, .08);
+}
+.pc-icon {
+    width: 76px; height: 76px; border-radius: 20px; margin-right: 28px; font-size: 40px;
+    display: flex; align-items: center; justify-content: center; background: rgba(122, 162, 255, .25); color: #cfdbff;
+}
+.pc-main { flex: 1; min-width: 0; }
+.pc-name { font-size: 34px; font-weight: 700; }
+.pc-sub { font-size: 23px; color: var(--muted); margin-top: 4px; }
+.pc-state { font-size: 23px; font-weight: 600; padding: 8px 18px; border-radius: 20px; background: rgba(255, 255, 255, .1); white-space: nowrap; }
+.pc-state.live { background: rgba(61, 220, 132, .22); color: #8ff0b8; }
+.pc.focused { background: var(--focus-bg); color: var(--focus-text); transform: scale(1.02); }
+.pc.focused .pc-sub { color: rgba(13, 15, 22, .6); }
+.pc.focused .pc-icon { background: rgba(122, 162, 255, .3); color: #3550a8; }
+.pc.focused .pc-state { background: rgba(13, 15, 22, .1); color: var(--focus-text); }
+.empty { padding: 60px 10px; text-align: center; font-size: 28px; color: var(--muted); }
+
+.actions { display: flex; margin-top: 26px; }
+.btn {
+    display: inline-flex; align-items: center; height: 72px; padding: 0 34px; margin-right: 18px;
+    border-radius: 36px; font-size: 26px; font-weight: 600;
+    background: rgba(255, 255, 255, .12); border: 1.5px solid rgba(255, 255, 255, .16);
+}
+.btn svg { font-size: 30px; margin-right: 14px; }
+.btn.focused { background: var(--focus-bg); color: var(--focus-text); border-color: var(--focus-bg); transform: scale(1.05); }
+.btn-hint { display: inline-flex; margin-left: 18px; opacity: .7; }
+.btn-hint svg { margin: 0 -4px; }
+.help { margin-top: 36px; font-size: 25px; line-height: 1.6; color: var(--muted); }
+.help b { color: var(--text); }
+
+/* ---------- Просмотр ---------- */
+#player { background: #000; }
+#video { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; background: #000; object-fit: contain; }
+.waiting {
+    position: absolute; left: 50%; top: 50%; width: 760px; margin-left: -380px; margin-top: -110px;
+    padding: 40px; text-align: center; font-size: 30px;
+    background: linear-gradient(135deg, rgba(40, 44, 62, .94), rgba(18, 20, 30, .94));
+}
+.spinner {
+    width: 64px; height: 64px; margin: 0 auto 22px; border-radius: 50%;
+    border: 6px solid rgba(255, 255, 255, .18); border-top-color: #fff;
+    animation: spin .9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.osd {
+    position: absolute; left: 80px; right: 80px; bottom: 60px; padding: 34px 40px;
+    background: linear-gradient(135deg, rgba(40, 44, 62, .92), rgba(18, 20, 30, .92));
+}
+.osd-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 26px; }
+.osd-title { font-size: 40px; font-weight: 800; }
+.osd-sub { font-size: 24px; color: var(--muted); margin-top: 4px; }
+.osd-stats { display: flex; }
+.osd-stats div { margin-left: 20px; padding: 12px 22px; border-radius: 18px; background: rgba(255, 255, 255, .08); text-align: center; min-width: 150px; }
+.osd-stats b { display: block; font-size: 30px; }
+.osd-stats span { font-size: 19px; color: var(--muted); }
+.osd-row { display: flex; }

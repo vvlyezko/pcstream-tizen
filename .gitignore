@@ -1,0 +1,34 @@
+# Зависимости и сборки
+node_modules/
+pc/dist/
+dist/
+*.wgt
+
+# Бинарники: FFmpeg (~170 МБ, больше лимита GitHub) и собранный winlist.exe —
+# их готовит tools/prepare.ps1
+pc/bin/*.exe
+
+# Подписи и сертификаты Tizen
+author-signature.xml
+signature*.xml
+*.p12
+*.pwd
+profiles.xml
+.project
+.tproject
+.sign/
+.buildResult/
+
+# Тестовые записи
+*.mp4
+*.flv
+*.wav
+
+# Редакторы и система
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+Thumbs.db
+Desktop.ini
+.DS_Store

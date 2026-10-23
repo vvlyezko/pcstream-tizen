@@ -1,0 +1,11 @@
+PC Stream включает программу FFmpeg (https://ffmpeg.org) в сборке BtbN
+(https://github.com/BtbN/FFmpeg-Builds), вариант "win64-gpl".
+
+FFmpeg в этой сборке распространяется на условиях GNU General Public License
+версии 3 (GPLv3): https://www.gnu.org/licenses/gpl-3.0.html
+
+Исходный код FFmpeg: https://git.ffmpeg.org/ffmpeg.git
+Скрипты сборки и исходники сторонних библиотек: https://github.com/BtbN/FFmpeg-Builds
+
+FFmpeg запускается PC Stream как отдельная программа (ffmpeg.exe) и не связан
+с кодом PC Stream, который распространяется по лицензии MIT.

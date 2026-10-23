@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'">
+    <title>PC Stream</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="titlebar">
+        <div class="brand">
+            <div class="logo">
+                <svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="12.5" rx="2.5"/><path d="M8 20.5h8M12 16.5v4"/><path d="M10 8.5l4.5 2-4.5 2z" class="fill"/></svg>
+            </div>
+            <div>
+                <div class="brand-name">PC Stream</div>
+                <div class="brand-sub">Трансляция на телевизор</div>
+            </div>
+        </div>
+        <div id="statusPill" class="pill idle"><span class="dot"></span><span id="statusText">Готов к трансляции</span></div>
+    </header>
+
+    <main class="layout">
+        <section class="glass sources">
+            <div class="sources-head">
+                <div class="tabs" id="tabs">
+                    <button class="tab active" data-kind="screen">Весь экран</button>
+                    <button class="tab" data-kind="window">Отдельное окно</button>
+                </div>
+                <button class="icon-btn" id="refreshBtn" title="Обновить список">
+                    <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.5M20 4v4.5h-4.5"/></svg>
+                </button>
+            </div>
+            <div class="grid" id="grid"></div>
+        </section>
+
+        <aside class="side">
+            <div class="glass card now">
+                <div class="card-title">Источник</div>
+                <div class="preview" id="preview"><div class="preview-empty">Выберите экран или окно</div></div>
+                <div class="preview-name" id="previewName">—</div>
+                <button class="start" id="startBtn" disabled>
+                    <svg viewBox="0 0 24 24"><path d="M8 5.5l11 6.5-11 6.5z" class="fill"/></svg>
+                    <span>Начать трансляцию</span>
+                </button>
+                <div class="stats" id="stats">
+                    <div><b id="stFps">—</b><span>кадров/с</span></div>
+                    <div><b id="stMbps">—</b><span>Мбит/с</span></div>
+                    <div><b id="stRes">—</b><span>разрешение</span></div>
+                </div>
+            </div>
+
+            <div class="glass card">
+                <div class="card-title">Качество</div>
+                <div class="row">
+                    <span>Разрешение</span>
+                    <div class="seg" data-key="res"><button data-v="0">Исх.</button><button data-v="1440">1440p</button><button data-v="1080">1080p</button><button data-v="720">720p</button></div>
+                </div>
+                <div class="row">
+                    <span>Частота кадров</span>
+                    <div class="seg" data-key="fps"><button data-v="30">30</button><button data-v="60">60</button></div>
+                </div>
+                <div class="row">
+                    <span>Битрейт, Мбит/с</span>
+                    <div class="seg" data-key="bitrate"><button data-v="10">10</button><button data-v="20">20</button><button data-v="30">30</button><button data-v="45">45</button></div>
+                </div>
+                <label class="row toggle"><span>Показывать курсор</span><input type="checkbox" data-key="cursor"><i></i></label>
+                <label class="row toggle"><span>Передавать звук</span><input type="checkbox" data-key="audio"><i></i></label>
+                <label class="row toggle"><span>Заглушить звук на ПК</span><input type="checkbox" data-key="muteLocal"><i></i></label>
+                <div class="hint">HDR на ПК остаётся включённым. Для Wi‑Fi выбирайте 10–20 Мбит/с.</div>
+            </div>
+
+            <div class="glass card">
+                <div class="card-title">Подключение</div>
+                <div id="netList" class="net"></div>
+                <div class="card-title sub">Телевизоры</div>
+                <div id="clientList" class="clients"><div class="muted">Нет подключений. Откройте PC Stream на телевизоре.</div></div>
+            </div>
+        </aside>
+    </main>
+
+    <div id="toast" class="toast"></div>
+    <script src="app.js"></script>
+</body>
+</html>

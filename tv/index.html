@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=1920, user-scalable=no">
+    <title>PC Stream</title>
+    <link rel="stylesheet" href="css/app.css">
+    <script src="$WEBAPIS/webapis/webapis.js"></script>
+</head>
+<body>
+    <div id="app">
+        <!-- Поиск компьютеров -->
+        <section id="home" class="screen">
+            <div class="bg"></div>
+            <div class="home-inner">
+                <div class="brand">
+                    <div class="logo"><svg viewBox="0 0 24 24"><rect x="2.5" y="4" width="19" height="12.5" rx="2.5"/><path d="M8 20.5h8M12 16.5v4"/><path d="M10 8.5l4.5 2-4.5 2z" class="fill"/></svg></div>
+                    <div>
+                        <div class="brand-name">PC Stream</div>
+                        <div class="brand-sub">Экран компьютера на телевизоре</div>
+                    </div>
+                </div>
+                <div class="panel glass">
+                    <div class="panel-head">
+                        <div class="panel-title">Компьютеры в сети</div>
+                        <div id="scanState" class="scan-state"></div>
+                    </div>
+                    <div id="pcList" class="pc-list"></div>
+                    <div class="actions">
+                        <div class="btn f" id="rescanBtn"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.4-5.7L20 8.5M20 4v4.5h-4.5"/></svg>Искать снова</div>
+                    </div>
+                </div>
+                <div class="help">Запустите <b>PC Stream</b> на компьютере и нажмите «Начать трансляцию».<br>Компьютер и телевизор должны быть в одной сети.</div>
+            </div>
+        </section>
+
+        <!-- Просмотр -->
+        <section id="player" class="screen hidden">
+            <video id="video" autoplay playsinline></video>
+            <div id="waiting" class="waiting glass hidden">
+                <div class="spinner"></div>
+                <div id="waitingText">Подключение…</div>
+            </div>
+            <div id="osd" class="osd glass hidden">
+                <div class="osd-top">
+                    <div>
+                        <div id="osdTitle" class="osd-title">—</div>
+                        <div id="osdSub" class="osd-sub">—</div>
+                    </div>
+                    <div class="osd-stats">
+                        <div><b id="sRes">—</b><span>разрешение</span></div>
+                        <div><b id="sFps">—</b><span>кадров/с</span></div>
+                        <div><b id="sMbps">—</b><span>Мбит/с</span></div>
+                        <div><b id="sLag">—</b><span>задержка</span></div>
+                    </div>
+                </div>
+                <div class="osd-row">
+                    <div class="btn f" id="delayBtn"><span class="btn-label">Синхронизация звука: <b id="delayVal">0</b> мс</span><span class="btn-hint"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></span></div>
+                    <div class="btn f" id="disconnectBtn">Отключиться</div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+</html>

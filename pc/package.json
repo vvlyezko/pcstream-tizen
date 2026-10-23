@@ -1,0 +1,80 @@
+{
+  "name": "pcstream",
+  "productName": "PC Stream",
+  "version": "1.0.0",
+  "description": "PC Stream: трансляция экрана ПК со звуком на Samsung Smart TV (Tizen)",
+  "main": "main.js",
+  "author": "PC Stream contributors",
+  "license": "MIT",
+  "homepage": "https://github.com/vvlyezko/pcstream-tizen",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vvlyezko/pcstream-tizen.git"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test:mux": "node test/mux-test.js",
+    "dist": "electron-builder --win",
+    "get-ffmpeg": "powershell -ExecutionPolicy Bypass -File ../tools/get-ffmpeg.ps1"
+  },
+  "devDependencies": {
+    "electron": "^39.8.10",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "io.github.vvlyezko.pcstream",
+    "productName": "PC Stream",
+    "copyright": "PC Stream contributors",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "src/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "bin",
+        "to": "bin",
+        "filter": [
+          "ffmpeg.exe",
+          "winlist.exe",
+          "FFMPEG-LICENSE.txt"
+        ]
+      }
+    ],
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PC Stream",
+      "artifactName": "PC-Stream-Setup-${version}.exe",
+      "deleteAppDataOnUninstall": false
+    },
+    "portable": {
+      "artifactName": "PC-Stream-${version}-portable.exe"
+    }
+  }
+}
