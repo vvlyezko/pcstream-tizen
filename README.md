@@ -170,5 +170,5 @@ npm run dist                                                    # установ
 ## Лицензия
 
 Код PC Stream распространяется по лицензии [MIT](LICENSE). Сборка для Windows включает FFmpeg,
-он распространяется по GPLv3 (см. `pc/bin/FFMPEG-LICENSE.txt`). Samsung и Tizen — товарные
+он распространяется по GPLv3 (см. [NOTICE](NOTICE) и `pc/bin/FFMPEG-LICENSE.txt`). Samsung и Tizen — товарные
 знаки их владельцев.
