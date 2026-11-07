@@ -43,7 +43,8 @@
         "filter": [
           "ffmpeg.exe",
           "winlist.exe",
-          "FFMPEG-LICENSE.txt"
+          "FFMPEG-LICENSE.txt",
+          "scrgb.hook"
         ]
       }
     ],

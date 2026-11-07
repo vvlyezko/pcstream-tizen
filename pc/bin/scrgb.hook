@@ -1,0 +1,11 @@
+// scRGB (Windows HDR, захват ddagrab 16 бит): линейный свет, 1.0 = 80 нит.
+// libplacebo считает линейный 1.0 опорным белым (203 нит), поэтому без поправки
+// HDR-картинка выходила в 2,5 раза ярче. Масштабируем до перевода в PQ/BT.2020.
+//!HOOK LINEAR
+//!BIND HOOKED
+//!DESC scRGB 80 nits -> libplacebo reference white
+vec4 hook() {
+    vec4 c = HOOKED_texOff(0);
+    c.rgb *= 80.0 / 203.0;
+    return c;
+}

@@ -3,7 +3,7 @@
 
 const $ = (id) => document.getElementById(id);
 
-const DEFAULTS = { res: 0, fps: 60, bitrate: 20, cursor: true, audio: true, muteLocal: false };
+const DEFAULTS = { res: 0, fps: 60, bitrate: 20, hdr: false, cursor: true, audio: true, muteLocal: false };
 let settings = Object.assign({}, DEFAULTS, JSON.parse(localStorage.getItem('pcs.settings') || '{}'));
 let kind = localStorage.getItem('pcs.kind') || 'screen';
 let sources = [];
@@ -198,7 +198,7 @@ async function start() {
     if (!s) return;
     await window.pcs.start({
         kind: s.kind, hwnd: s.hwnd, output: s.output, label: s.kind === 'screen' ? 'Весь экран' : s.name,
-        srcW: s.w, srcH: s.h, res: settings.res,
+        srcW: s.w, srcH: s.h, res: settings.res, hdr: settings.hdr,
         fps: settings.fps, bitrate: settings.bitrate, cursor: settings.cursor,
         audio: settings.audio, muteLocal: settings.audio && settings.muteLocal
     });

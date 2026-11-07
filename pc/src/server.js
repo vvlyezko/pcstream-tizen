@@ -116,6 +116,8 @@ class StreamServer extends EventEmitter {
         super();
         this.clients = new Set();
         this.init = null;       // init-сегмент текущей трансляции
+        this.gop = [];          // фрагменты с последнего ключевого кадра (для новых клиентов)
+        this.gopBytes = 0;
         this.meta = null;       // { codec, width, height, fps, label }
         this.streaming = false;
         this.id = crypto.createHash('sha1').update(os.hostname() + os.userInfo().username).digest('hex').slice(0, 12);
@@ -172,7 +174,10 @@ class StreamServer extends EventEmitter {
         if (this.streaming && this.init) {
             c.json({ type: 'start', meta: this.meta });
             c.packet(T_INIT, this.init);
-            c.needKey = true;
+            // Кадры с последнего ключевого — картинка сразу, даже если окно сейчас неподвижно
+            // (захват окна шлёт кадры только при изменениях, ключевого можно ждать сколько угодно)
+            this.gop.forEach((d) => c.packet(T_VIDEO, d));
+            c.needKey = !this.gop.length;
         }
     }
 
@@ -180,6 +185,8 @@ class StreamServer extends EventEmitter {
     begin(meta, init) {
         this.meta = meta;
         this.init = init;
+        this.gop = [];
+        this.gopBytes = 0;
         this.streaming = true;
         this.clients.forEach((c) => {
             c.json({ type: 'start', meta });
@@ -192,6 +199,8 @@ class StreamServer extends EventEmitter {
     end(reason) {
         this.streaming = false;
         this.init = null;
+        this.gop = [];
+        this.gopBytes = 0;
         this.clients.forEach((c) => c.json({ type: 'stop', reason: reason || '' }));
         this.emit('clients');
     }
@@ -199,6 +208,13 @@ class StreamServer extends EventEmitter {
     video(frag) {
         this.stats.frames++;
         this.stats.bytes += frag.data.length;
+        // GOP-кэш для новых клиентов: с ключевого кадра; слишком большой — не держим
+        if (frag.key) { this.gop = [frag.data]; this.gopBytes = frag.data.length; }
+        else if (this.gop.length) {
+            this.gop.push(frag.data);
+            this.gopBytes += frag.data.length;
+            if (this.gopBytes > 24 * 1024 * 1024 || this.gop.length > 600) { this.gop = []; this.gopBytes = 0; }
+        }
         this.clients.forEach((c) => {
             if (c.needKey && !frag.key) return;
             if (c.congested) { c.needKey = true; this.stats.dropped++; return; }

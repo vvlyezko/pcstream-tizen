@@ -19,9 +19,35 @@ function ffmpegPath() {
     return path.join(base, 'ffmpeg.exe');
 }
 
+/* HDR: захват в scRGB (16 бит, линейный свет, 1.0 = 80 нит) → libplacebo на видеокарте
+   (Vulkan): PQ + BT.2020, 10 бит, при необходимости уменьшение → HEVC Main10 с HDR10-метками.
+   bin/scrgb.hook поправляет масштаб: libplacebo считает линейный 1.0 = 203 нит.
+   zscale не годится: на этой сборке обрезает всё ярче 1.0 (HDR пропадает). */
+function hdrArgs(o, fps, br) {
+    const input = o.kind === 'window'
+        ? 'gfxcapture=hwnd=' + o.hwnd + ':max_framerate=' + fps + ':capture_cursor=' + (o.cursor ? 1 : 0) + ':output_fmt=16bit'
+        : 'ddagrab=output_idx=' + (o.output || 0) + ':framerate=' + fps + ':draw_mouse=' + (o.cursor ? 1 : 0) + ':output_fmt=16bit';
+    // уменьшаем только если кадр выше заданного (запятые в выражениях экранируются для графа фильтров)
+    const size = o.res ? ':w=trunc(iw*min(ih\\,' + o.res + ')/ih/2)*2:h=trunc(min(ih\\,' + o.res + ')/2)*2' : '';
+    const vf = 'hwdownload,format=rgbaf16le,setparams=color_primaries=bt709:color_trc=linear:colorspace=gbr:range=pc,' +
+        'hwupload,libplacebo=custom_shader_path=scrgb.hook:format=p010le:colorspace=bt2020nc:color_primaries=bt2020:color_trc=smpte2084:range=tv' + size +
+        ',hwdownload,format=p010le';
+    return [
+        '-hide_banner', '-loglevel', 'warning', '-nostats',
+        '-init_hw_device', 'vulkan=vk', '-filter_hw_device', 'vk',
+        '-f', 'lavfi', '-i', input, '-vf', vf,
+        '-c:v', 'hevc_nvenc', '-preset', 'p2', '-tune', 'ull', '-zerolatency', '1',
+        '-rc', 'cbr', '-b:v', br + 'M', '-maxrate', br + 'M', '-bufsize', Math.max(2, Math.round(br / 3)) + 'M',
+        '-g', String(fps), '-bf', '0', '-profile:v', 'main10', '-forced-idr', '1',
+        '-color_primaries', 'bt2020', '-color_trc', 'smpte2084', '-colorspace', 'bt2020nc', '-color_range', 'tv',
+        '-f', 'flv', '-flvflags', 'no_duration_filesize', 'pipe:1'
+    ];
+}
+
 function buildArgs(o) {
     const fps = o.fps || 60;
     const br = o.bitrate || 20;
+    if (o.hdr) return hdrArgs(o, fps, br);
     const even = (v) => Math.max(2, Math.round(v / 2) * 2);
     let input;
     if (o.kind === 'window') {
@@ -68,12 +94,13 @@ class Capture extends EventEmitter {
             const info = this.muxer.info;
             this.emit('init', this.muxer.init(), {
                 codec: info.codec, width: info.width, height: info.height,
-                fps: this.opts.fps, label: this.opts.label, kind: this.opts.kind
+                fps: this.opts.fps, label: this.opts.label, kind: this.opts.kind, hdr: !!this.opts.hdr
             });
         });
         parser.on('frame', (f) => { if (this.muxer) this.emit('fragment', this.muxer.fragment(f)); });
 
-        this.proc = spawn(ffmpegPath(), args, { windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+        // cwd = bin: там шейдер scrgb.hook (путь без «C:» — двоеточие ломает разбор параметров фильтра)
+        this.proc = spawn(ffmpegPath(), args, { windowsHide: true, cwd: path.dirname(ffmpegPath()), stdio: ['ignore', 'pipe', 'pipe'] });
         this.proc.stdout.on('data', (d) => {
             try { parser.push(d); } catch (e) { this.emit('error', e); this.stop(); }
         });

@@ -271,7 +271,7 @@
     }
 
 
-    var meta = null;
+    var meta = null, noFrameTimer = null;
     function onText(m) {
         if (m.type === 'hello') {
             current.entry.info = m.server;
@@ -281,8 +281,16 @@
             Video.setup(meta);
             Audio.start();
             $('osdSub').textContent = current.entry.info.name + ' · ' + meta.label;
-            $('sRes').textContent = meta.width + '×' + meta.height;
+            $('sRes').textContent = meta.width + '×' + meta.height + (meta.hdr ? ' HDR' : '');
             waiting('Запуск трансляции…');
+            // Захват окна присылает кадры только при изменениях: у неподвижного окна картинки
+            // может не быть, пока в нём что-то не изменится — объясняем, а не «вечный запуск»
+            clearTimeout(noFrameTimer);
+            noFrameTimer = setTimeout(function () {
+                if (waitingOn && meta && meta.kind === 'window') {
+                    waiting('Ждём изображение: окно «' + meta.label + '» на компьютере пока не меняется. Картинка появится, как только в нём что-нибудь изменится.');
+                }
+            }, 3000);
         } else if (m.type === 'stop') {
             Video.reset();
             Audio.stop();
